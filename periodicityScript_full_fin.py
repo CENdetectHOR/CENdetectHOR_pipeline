@@ -22,7 +22,7 @@ def make_mers(seq,mer_len):
                     d[w].append(kmer)
     return(d)
 
-def dist_calc(d):
+def dist_calc(d, seq):
     finlist=[]
     d2plot=[]
     diff=[]
@@ -110,7 +110,7 @@ with open(windSumm, "w") as o:
             out2w.append(l2w)
         else:
             prevline=r-1
-            rel_start=int(out2w[prevline][1])+1
+            rel_start=int(out2w[prevline][1])
             l=len(res)
             rel_end=rel_start+l
             l2w = [str(rel_start), str(rel_end), str(l)]
@@ -129,7 +129,7 @@ for x in ind_list:
     new_seq=result[x]
     new_seq = [new_seq[i:i + 1000] for i in range(0, len(new_seq), 1000)]
     mer_dict=make_mers(new_seq, 8)
-    d2plot=dist_calc(mer_dict)
+    d2plot=dist_calc(mer_dict, new_seq)
     count_dist=Counter(d2plot)
     monlen=int(list(count_dist.most_common(1)[0])[0])
     plt.figure(figsize=(20,15))
