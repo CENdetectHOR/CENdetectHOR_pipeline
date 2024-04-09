@@ -120,11 +120,9 @@ with open(windSumm, "w") as o:
 
 #ind_list=[lenlist.index(x) for x in lenlist if x>5000]
 ind_list=[]
-for x in lenlist:
-    if x>5000:
-        i=lenlist.index(x)
-        if i not in ind_list:
-            ind_list.append(i)
+for v,val in enumerate(lenlist):
+    if val>5000 and v not in ind_list:
+        ind_list.append(v)
 
 l2bed_list=[]
 for x in ind_list:
