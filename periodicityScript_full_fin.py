@@ -118,7 +118,14 @@ with open(windSumm, "w") as o:
             out2w.append(l2w)
     [o.write('\t'.join(x)+'\n') for x in out2w]
 
-ind_list=[lenlist.index(x) for x in lenlist if x>3000]
+#ind_list=[lenlist.index(x) for x in lenlist if x>5000]
+ind_list=[]
+for x in lenlist:
+    if x>5000:
+        i=lenlist.index(x)
+        if i not in ind_list:
+            ind_list.append(i)
+
 l2bed_list=[]
 for x in ind_list:
     new_seq=result[x]
