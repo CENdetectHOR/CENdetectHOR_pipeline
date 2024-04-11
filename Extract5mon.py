@@ -87,6 +87,7 @@ for s in seqs:
 
 with open(out, "w") as o:
     mon2w=[x for y in mon2w for x in y if len(y)>0]
-    for r,ran in enumerate(mon2w):
+    fin_ran_ls=random_seq=random.sample(mon2w, 5)
+    for r,ran in enumerate(fin_ran_ls):
         o.write(">"+chrom+"_mon"+str(r+1)+"\n")
         o.write(str(ran)+"\n")
