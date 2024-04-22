@@ -39,9 +39,10 @@ rule periodicity:
 		windSumm="/lustrehome/alessiadaponte/CENdetectHOR/results/wind_summary/{PREFIX}.chr{CHR}.txt",
 		bed="/lustrehome/alessiadaponte/CENdetectHOR/results/wind2analize/{PREFIX}.chr{CHR}.windows.bed"
 	params:
-		plotFold="/lustrehome/alessiadaponte/CENdetectHOR/results/plots/chr{CHR}"
+		plotFold="/lustrehome/alessiadaponte/CENdetectHOR/results/plots/chr{CHR}/"
 	shell:
 		'''
+		#mkdir {params.plotFold}
 		python ./scripts/periodicityScript_full_fin.py --file {input.seq} --plot-fold {params.plotFold} --wind-summ {output.windSumm} --wind-bed {output.bed}
 		'''
 
@@ -127,9 +128,10 @@ rule stringDec:
 		outdir="/lustrehome/alessiadaponte/CENdetectHOR/results/decomposition/{PREFIX}"
 	output:
 		rawF="/lustrehome/alessiadaponte/CENdetectHOR/results/decomposition/{PREFIX}/final_decomposition_raw.tsv"
+	threads: 16
 	shell:
 		'''
-		stringdecomposer {input.fullSeq} {input.fullMons} -o {params.outdir}
+		stringdecomposer {input.fullSeq} {input.fullMons} -o {params.outdir} -t {threads}
 		'''
 
 rule mon2bed:
@@ -140,7 +142,7 @@ rule mon2bed:
 		decBed="/lustrehome/alessiadaponte/CENdetectHOR/results/decomposition/{PREFIX}_final_decomposition.bed"
 	shell:
 		'''
-		Rscript ./scripts/dec2bed_fin.R {input.stringDec} {input.wind_bed} {output.decBed}
+		Rscript ./scripts/dec2bed_fin_fullChr.R {input.stringDec} {input.wind_bed} {output.decBed}
 		'''
 
 rule HORdet:
