@@ -3,24 +3,27 @@ import os
 #FASTA_FOL = os.path.abspath(config["fasta-folder"])
 #FASTA_FOL = os.path.abspath("~/CENdetectHOR")
 
+workdir: "/lustrehome/alessiadaponte/CENdetectHOR/"
 #chrom=[15]
 #prefix="HSA"
 CONS="human_cons_alphasat.txt"
 #chrom=[10,15]
 #prefix="HSA"
 
+
 prefix, chrom= glob_wildcards("fasta/{PREFIX}.chr{CHR}.fasta")
 
 rule all:
 	input:
-		tree=expand("/lustrehome/alessiadaponte/CENdetectHOR/results/HOR/{PREFIX}.FULLchr.tree.xml", PREFIX=prefix),
-		hist=expand("/lustrehome/alessiadaponte/CENdetectHOR/results/HOR/plots/{PREFIX}.dist_hist.pdf", PREFIX=prefix),
-                matr=expand("/lustrehome/alessiadaponte/CENdetectHOR/results/HOR/plots/{PREFIX}.dist_matrix.pdf", PREFIX=prefix),
-		fullWind=expand("/lustrehome/alessiadaponte/CENdetectHOR/results/wind2analize/{PREFIX}.FULLchr.windows.filtered.bed", PREFIX=prefix),
-		fullMons=expand("/lustrehome/alessiadaponte/CENdetectHOR/results/monomers/{PREFIX}.FULLchr_mons.fasta", PREFIX=prefix),
-		fullSeq=expand("/lustrehome/alessiadaponte/CENdetectHOR/fasta/{PREFIX}.FULLchr.fasta", PREFIX=prefix),
-		rawF=expand("/lustrehome/alessiadaponte/CENdetectHOR/results/decomposition/{PREFIX}/final_decomposition_raw.tsv", PREFIX=prefix)
-		#consExt=expand("results/monomers/{PREFIX}_chr0_cons.fasta", PREFIX=prefix)
+		tree=expand("results/HOR/{PREFIX}.{CHR}.tree.xml", PREFIX=prefix, CHR=chrom),
+		#disMatr=expand("/lustre/home/alessiadaponte/h2/results/HOR/distMatr/{PREFIX}.{CHR}/{CHR}.dist_matrix.npy", PREFIX=prefix, CHR=chrom),
+		#hist=expand("/lustrehome/alessiadaponte/centromeres_fromGlennis/chimp/h1/results/HOR/plots/{PREFIX}.dist_hist.pdf", PREFIX=prefix),
+                #matr=expand("/lustrehome/alessiadaponte/centromeres_fromGlennis/chimp/h1/results/HOR/plots/{PREFIX}.dist_matrix.pdf", PREFIX=prefix),
+		#fullWind=expand("/lustrehome/alessiadaponte/centromeres_fromGlennis/chimp/h1/results/wind2analize/{PREFIX}.FULLchr.windows.filtered.bed", PREFIX=prefix),
+		#fullMons=expand("/lustre/home/alessiadaponte/h2/results/monomers/{PREFIX}.FULLchr_mons.fasta", PREFIX=prefix),
+		#seq=expand("/lustre/home/alessiadaponte/chimp/h2/fasta/{PREFIX}.chr{CHR}.fasta", PREFIX=prefix, CHR=chrom),
+		rawF=expand("results/decomposition/{PREFIX}/{CHR}/final_decomposition_raw.tsv", PREFIX=prefix, CHR=chrom)
+		#consExt=expand("results/monomers/{PREFIX}_c0_cons.fasta", PREFIX=prefix)
 
 #rule stainedGlass:
 #	input:
@@ -34,37 +37,50 @@ rule all:
 
 rule periodicity:
 	input:
-		seq="/lustrehome/alessiadaponte/CENdetectHOR/fasta/{PREFIX}.chr{CHR}.fasta"
+		seq="fasta/{PREFIX}.chr{CHR}.fasta"
 	output:
-		windSumm="/lustrehome/alessiadaponte/CENdetectHOR/results/wind_summary/{PREFIX}.chr{CHR}.txt",
-		bed="/lustrehome/alessiadaponte/CENdetectHOR/results/wind2analize/{PREFIX}.chr{CHR}.windows.bed"
+		windSumm="results/wind_summary/{PREFIX}.chr{CHR}.txt",
+		bed="results/wind2analize/{PREFIX}.chr{CHR}.windows.bed"
 	params:
-		plotFold="/lustrehome/alessiadaponte/CENdetectHOR/results/plots/chr{CHR}/"
+		plotFold="results/plots/chr{CHR}/"
 	shell:
 		'''
 		#mkdir {params.plotFold}
-		python ./scripts/periodicityScript_full_fin.py --file {input.seq} --plot-fold {params.plotFold} --wind-summ {output.windSumm} --wind-bed {output.bed}
+		python scripts/periodicityScript_full_fin.py --file {input.seq} --plot-fold {params.plotFold} --wind-summ {output.windSumm} --wind-bed {output.bed}
 		'''
+
+rule concatenateWind:
+        input:
+                wind2conc=expand("results/wind2analize/{PREFIX}.chr{CHR}.windows.bed", CHR=chrom, allow_missing=True)
+        output:
+                fullWind="results/wind2analize/{PREFIX}.FULLchr.windows.bed"
+        shell:
+                '''
+                cat {input.wind2conc} > {output.fullWind}
+                '''
 
 rule selectWind:
 	input:
-		windF=rules.periodicity.output.bed
+		windF=rules.concatenateWind.output.fullWind
 	output:
-		selWind="/lustrehome/alessiadaponte/CENdetectHOR/results/wind2analize/{PREFIX}.chr{CHR}.windows.filtered.bed"
+		selWind="results/wind2analize/{PREFIX}.FULLchr.windows.filtered.bed"
+	params:
+		outfold="results/wind2analize/filtering/"
 	shell:
 		'''
-		num=$(cut -f 4 {input.windF} |sort|uniq |head -n 1); awk -v n="$num" '$4 == n' {input.windF} > {output.selWind}
+		python windowsFiltering.py --bed {input.windF} --out {params.outfold}
+		cp {params.outfold}/*_main.bed {output.selWind}
 		'''
 
 rule extractCons:
 	input:
-		seq="/lustrehome/alessiadaponte/CENdetectHOR/fasta/{PREFIX}.chr{CHR}.fasta",
+		seq="fasta/{PREFIX}.chr{CHR}.fasta",
 		wind=rules.selectWind.output.selWind
 	output:
-		consExt="/lustrehome/alessiadaponte/CENdetectHOR/results/monomers/{PREFIX}_chr0cons.fasta"
+		consExt="monomers/{PREFIX}_chr0cons.fasta"
 	shell:
 		'''
-		python ./scripts/Extract5mon_NOcons.py --fasta {input.seq} --bed {input.wind} --cons-file {output.consExt}		
+		python scripts/Extract5mon_NOcons.py --fasta {input.seq} --bed {input.wind} --cons-file {output.consExt}		
 		'''
 
 #rule copyCons:
@@ -79,86 +95,86 @@ rule extractCons:
 
 rule extractMon:
 	input:
-		seq="/lustrehome/alessiadaponte/CENdetectHOR/fasta/{PREFIX}.chr{CHR}.fasta",
+		seq="fasta/{PREFIX}.chr{CHR}.fasta",
 		wind=rules.selectWind.output.selWind,
 		cons=CONS if os.path.isfile(CONS) else rules.extractCons.output.consExt
 	output:
-		mon="/lustrehome/alessiadaponte/CENdetectHOR/results/monomers/{PREFIX}.chr{CHR}_mons.fasta"	
+		mon="results/monomers/{PREFIX}.chr{CHR}_mons.fasta"	
 	shell:
 		'''
-		python ./scripts/Extract5mon.py --fasta {input.seq} --bed {input.wind} --cons-file {input.cons} --out {output.mon}
+		python scripts/Extract5mon.py --fasta {input.seq} --bed {input.wind} --cons-file {input.cons} --out {output.mon}
 		'''
 
 rule concatenateMons:
 	input:
-		mon=expand("/lustrehome/alessiadaponte/CENdetectHOR/results/monomers/{PREFIX}.chr{CHR}_mons.fasta", CHR=chrom,PREFIX=prefix),
+		mon=expand("results/monomers/{PREFIX}.chr{CHR}_mons.fasta", CHR=chrom,PREFIX=prefix),
 		cons=CONS if os.path.isfile(CONS) else rules.extractCons.output.consExt
 	output:
-		fullMons="/lustrehome/alessiadaponte/CENdetectHOR/results/monomers/{PREFIX}.FULLchr_mons.fasta"
+		fullMons="results/monomers/{PREFIX}.FULLchr_mons.fasta"
 	shell:
 		'''
 		cat {input.mon} {input.cons} > {output.fullMons}
 		'''
 
-rule concatenateSeq:
-	input:
-		seq2conc=expand("/lustrehome/alessiadaponte/CENdetectHOR/fasta/{PREFIX}.chr{CHR}.fasta", CHR=chrom, allow_missing=True)
-	output:
-		fullSeq="/lustrehome/alessiadaponte/CENdetectHOR/fasta/{PREFIX}.FULLchr.fasta"
-	shell:
-		'''
-		cat {input.seq2conc} > {output.fullSeq}
-		'''
+#rule concatenateSeq:
+#	input:
+#		seq2conc=expand("/lustre/home/alessiadaponte/centromeres_fromGlennis/chimp/h2/fasta/{PREFIX}.chr{CHR}.fasta", CHR=chrom, allow_missing=True)
+#	output:
+#		fullSeq="/lustre/home/alessiadaponte/centromeres_fromGlennis/chimp/h2/fasta/{PREFIX}.FULLchr.fasta"
+#	shell:
+#		'''
+#		cat {input.seq2conc} > {output.fullSeq}
+#		'''
 
-rule concatenateWind:
-        input:
-                wind2conc=expand("/lustrehome/alessiadaponte/CENdetectHOR/results/wind2analize/{PREFIX}.chr{CHR}.windows.filtered.bed", CHR=chrom, allow_missing=True)
-        output:
-                fullWind="/lustrehome/alessiadaponte/CENdetectHOR/results/wind2analize/{PREFIX}.FULLchr.windows.filtered.bed"
-        shell:
-                '''
-                cat {input.wind2conc} > {output.fullWind}
-                '''
+#rule concatenateWind:
+#        input:
+#                wind2conc=expand("/lustre/home/alessiadaponte/centromeres_fromGlennis/chimp/h1/results/wind2analize/{PREFIX}.chr{CHR}.windows.filtered.bed", CHR=chrom, allow_missing=True)
+#        output:
+#                fullWind="/lustrehome/alessiadaponte/centromeres_fromGlennis/chimp/h1/results/wind2analize/{PREFIX}.FULLchr.windows.filtered.bed"
+#        shell:
+#                '''
+#                cat {input.wind2conc} > {output.fullWind}
+#                '''
 
 rule stringDec:
 	input:
-		fullSeq=rules.concatenateSeq.output.fullSeq,
+		seq="fasta/{PREFIX}.chr{CHR}.fasta",
 		fullMons=rules.concatenateMons.output.fullMons
 	params:
-		outdir="/lustrehome/alessiadaponte/CENdetectHOR/results/decomposition/{PREFIX}"
+		outdir="results/decomposition/{PREFIX}/{CHR}"
 	output:
-		rawF="/lustrehome/alessiadaponte/CENdetectHOR/results/decomposition/{PREFIX}/final_decomposition_raw.tsv"
-	threads: 16
+		rawF="results/decomposition/{PREFIX}/{CHR}/final_decomposition_raw.tsv"
+	threads: 4
 	shell:
 		'''
-		stringdecomposer {input.fullSeq} {input.fullMons} -o {params.outdir} -t {threads}
+		stringdecomposer {input.seq} {input.fullMons} -o {params.outdir} -t {threads}
 		'''
 
 rule mon2bed:
 	input:
 		stringDec=rules.stringDec.output.rawF,
-		wind_bed=rules.concatenateWind.output.fullWind
+		wind_bed=rules.selectWind.output.selWind
 	output:
-		decBed="/lustrehome/alessiadaponte/CENdetectHOR/results/decomposition/{PREFIX}_final_decomposition.bed"
+		decBed="results/decomposition/{PREFIX}/{CHR}/final_decomposition.bed"
 	shell:
 		'''
-		Rscript ./scripts/dec2bed_fin_fullChr.R {input.stringDec} {input.wind_bed} {output.decBed}
+		Rscript scripts/dec2bed_fin.R {input.stringDec} {input.wind_bed} {output.decBed}
 		'''
 
 rule HORdet:
 	input:
-		fullSeq=rules.concatenateSeq.output.fullSeq,
+		seq="fasta/{PREFIX}.chr{CHR}.fasta",
 		fullStringDec=rules.mon2bed.output.decBed
-	#params:
-		#plotdir="/lustrehome/alessiadaponte/CENdetectHOR/results/HOR/plots"
+	params:
+		matr="results/HOR/distMatr/chr{CHR}/"
 	output:
-		tree="/lustrehome/alessiadaponte/CENdetectHOR/results/HOR/{PREFIX}.FULLchr.tree.xml",
-		hist="/lustrehome/alessiadaponte/CENdetectHOR/results/HOR/plots/{PREFIX}.dist_hist.pdf",
-		matr="/lustrehome/alessiadaponte/CENdetectHOR/results/HOR/plots/{PREFIX}.dist_matrix.pdf"
+		tree="results/HOR/{PREFIX}.{CHR}.tree.xml"
+		#hist="/lustrehome/alessiadaponte/centromeres_fromGlennis/chimp/h1/results/HOR/plots/{PREFIX}.dist_hist.pdf",
+		#disMatr="/lustre/home/alessiadaponte/chimp/h2/results/HOR/distMatr/{PREFIX}.{CHR}/{CHR}.dist_matrix.npy"
 	log:
-		"/lustrehome/alessiadaponte/CENdetectHOR/results/{PREFIX}_HOR_clustering.log"
+		"results/{PREFIX}_{CHR}_HOR_clustering.log"
+	threads: 32
 	shell:
 		'''
-		python ./scripts/findHORsFromMonomersAD.py --fasta {input.fullSeq} --bed {input.fullStringDec} --out-tree {output.tree} --out-distHist {output.hist} --out-distMatr {output.matr} --log {log}
+		python scripts/findHORsFromMonomers_FullCen.py --fasta {input.seq} --bed {input.fullStringDec} --out-tree {output.tree} --out-distMatr {params.matr} --log {log} --t {threads}
 		'''
-

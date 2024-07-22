@@ -30,8 +30,9 @@ dec <- dec %>% mutate(chr4head=chr) %>%   mutate(start4head=rel_start+start_piec
 
 StringDec <- makeGRangesFromDataFrame(dec, start.field = "start4head", end.field = "end4head", seqnames.field = "seq",
                                       ignore.strand = T, keep.extra.columns = T)
+
 bed=read.table(bed_file)
-bed <- bed %>% mutate(V1=(unique(dec$seq)))
+bed <- bed %>% filter(V1==chr) %>% mutate(V1=(unique(dec$seq)))
 
 bed <- makeGRangesFromDataFrame(bed, start.field = "V2", end.field = "V3", seqnames.field = "V1",keep.extra.columns = T)  
  

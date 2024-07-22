@@ -1,12 +1,15 @@
 import numpy as np
-from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components, floyd_warshall, dijkstra
 import time
 
-def matrix_sparsity(matrix):
+def matrix_sparsity(matrix: np.ndarray) -> float:
     return 1.0 - np.count_nonzero(matrix) / matrix.size
 
-def matrix_closure(adjacency_matrix, use_floyd_warshall=False, use_dijkstra=False):
+def matrix_closure(
+    adjacency_matrix: np.ndarray,
+    use_floyd_warshall: bool = False,
+    use_dijkstra: bool = False
+) -> np.ndarray:
     if use_floyd_warshall:
         return 1*np.isfinite(floyd_warshall(csgraph=np.ascontiguousarray(adjacency_matrix), directed=False))
     if use_dijkstra:
@@ -18,13 +21,20 @@ def matrix_closure(adjacency_matrix, use_floyd_warshall=False, use_dijkstra=Fals
             return matrix_closure
         matrix_closure = new_matrix_closure
 
-def triu_closure(adjacency_triu, use_floyd_warshall=False, use_dijkstra=False):
+def triu_closure(
+    adjacency_triu: np.ndarray,
+    use_floyd_warshall: bool = False,
+    use_dijkstra: bool = False
+) -> np.ndarray:
     return np.triu(
         matrix_closure(
             adjacency_triu + adjacency_triu.T,
             use_floyd_warshall=use_floyd_warshall, use_dijkstra=use_dijkstra),1)
 
-def graph_connected_components(adjacency_matrix, sparse_matrix=False, use_floyd_warshall=False, use_dijkstra=False):
+def graph_connected_components(
+    adjacency_matrix: np.ndarray, sparse_matrix: bool=False,
+    use_floyd_warshall: bool=False, use_dijkstra: bool=False
+) -> np.ndarray:
     if sparse_matrix:
         n_components, labels = connected_components(csgraph=np.ascontiguousarray(adjacency_matrix), directed=False)
         return np.array([labels == component_index for component_index in range(n_components)])
@@ -34,10 +44,10 @@ def graph_connected_components(adjacency_matrix, sparse_matrix=False, use_floyd_
     np.fill_diagonal(adjacency_triu_closure, 1)
     return np.delete(adjacency_triu_closure, indexes_to_suppress > 0, axis=0)
 
-def format_time_interval(secs):
+def format_time_interval(secs: int) -> str:
     return f'{secs // 3600}:{(secs % 3600) // 60}:{secs % 60}'
 
-def test_graph_connected_components(adjacency_matrix):
+def test_graph_connected_components(adjacency_matrix: np.ndarray) -> np.ndarray:
     start_time = time.process_time()
     result_prod = graph_connected_components(adjacency_matrix=adjacency_matrix, sparse_matrix=False, use_floyd_warshall=False)
     print(f'Time for prod: {format_time_interval(time.process_time() - start_time)}')
