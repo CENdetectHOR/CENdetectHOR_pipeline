@@ -18,7 +18,7 @@ file=args.fasta
 wind_file=args.bed
 cons=args.cons_file
 
-def mon_extr_nocons(seq):
+def mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons):
     s2c_list=[]
     for p,pos in enumerate(seq):
         endpos=int(p)+6
@@ -74,7 +74,7 @@ full_seq="".join(full_seq)
 
 for n,s in enumerate(seqs):
     if n==0:
-        len_seq=len(s)
+        len_seq=int(s[1])-int(s[0])
         Nmax_mons=len_seq/mon
         Nmin_mons=Nmax_mons-(Nmax_mons/100*30)
         min_mon=mon-5
@@ -82,7 +82,7 @@ for n,s in enumerate(seqs):
         rel_start=int(s[0])-int(start)
         rel_end=int(s[1])-int(start)
         seq=Seq(full_seq[rel_start:rel_end])
-        ran_mon=mon_extr_nocons(seq)
+        ran_mon=mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons)
         mon2w.append(ran_mon)
 
 with open(cons, "w") as o:
