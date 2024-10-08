@@ -48,14 +48,18 @@ def dist_calc(d, seq):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--file",type=str, help="centromere sequence fasta file",required=True)
+parser.add_argument("--fasta",type=str, help="centromere sequence fasta file",required=True)
+parser.add_argument("--window-size", type=int, help="splitting window size",required=False, default=1000)
+parser.add_argument("--kmer-size", type=int, help="size of the kmer to search for periodicity",required=False, default=8)
 parser.add_argument("--plot-fold",type=str, help="full path of the folder in which the output plots will be saved",required=True)
 parser.add_argument("--wind-summ",type=str, help="output windows summary file",required=True)
 parser.add_argument("--wind-bed",type=str, help="bed file with the windows absolute coordinates",required=True)
 
 args = parser.parse_args()
 
-file=args.file
+file=args.fasta
+windSize=args.window_size
+kmer=args.kmer_size
 outfold=args.plot_fold
 windSumm=args.wind_summ
 bed=args.wind_bed
@@ -78,11 +82,11 @@ with open(file, "r") as f:
             seq.append(line.strip())
     seq=[x for y in seq for x in y]
     #dividing sequence in windows of 1kb 
-    seq=[seq[i:i + 1000] for i in range(0, len(seq), 1000)]
+    seq=[seq[i:i + windSize] for i in range(0, len(seq), windSize)]
 
-d=make_mers(seq, 8)
+d=make_mers(seq, kmer)
 
-ind4merge=[1 if 1000-len(d[k])>100 else 0 for k in d]
+ind4merge=[1 if windSize-len(d[k])>100 else 0 for k in d]
 
 seq=[''.join(x) for x in seq]
 
@@ -120,15 +124,16 @@ with open(windSumm, "w") as o:
 
 #ind_list=[lenlist.index(x) for x in lenlist if x>5000]
 ind_list=[]
+thres=5*windSize
 for v,val in enumerate(lenlist):
-    if val>5000 and v not in ind_list:
+    if val>thres and v not in ind_list:
         ind_list.append(v)
 
 l2bed_list=[]
 for x in ind_list:
     new_seq=result[x]
-    new_seq = [new_seq[i:i + 1000] for i in range(0, len(new_seq), 1000)]
-    mer_dict=make_mers(new_seq, 8)
+    new_seq = [new_seq[i:i + windSize] for i in range(0, len(new_seq), windSize)]
+    mer_dict=make_mers(new_seq, kmer)
     d2plot=dist_calc(mer_dict, new_seq)
     count_dist=Counter(d2plot)
     monlen=int(list(count_dist.most_common(1)[0])[0])

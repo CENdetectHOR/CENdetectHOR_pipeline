@@ -46,7 +46,7 @@ rule periodicity:
 	shell:
 		'''
 		#mkdir {params.plotFold}
-		python scripts/periodicityScript_full_fin.py --file {input.seq} --plot-fold {params.plotFold} --wind-summ {output.windSumm} --wind-bed {output.bed}
+		python scripts/periodicityScript_full_fin.py --fasta {input.seq} --plot-fold {params.plotFold} --wind-summ {output.windSumm} --wind-bed {output.bed}
 		'''
 
 rule concatenateWind:
@@ -68,8 +68,8 @@ rule selectWind:
 		outfold="results/wind2analize/filtering/"
 	shell:
 		'''
-		python windowsFiltering.py --bed {input.windF} --out {params.outfold}
-		cp {params.outfold}/*_main.bed {output.selWind}
+		python scripts/windowsFiltering.py --bed {input.windF} --out {params.outfold}
+		cp {params.outfold}*_main.bed {output.selWind}
 		'''
 
 rule extractCons:
@@ -80,7 +80,7 @@ rule extractCons:
 		consExt="monomers/{PREFIX}_chr0cons.fasta"
 	shell:
 		'''
-		python scripts/Extract5mon_NOcons.py --fasta {input.seq} --bed {input.wind} --cons-file {output.consExt}		
+		python scripts/Extract5mon_NOcons.py --fasta {input.seq} --bed {input.wind} --out-cons-file {output.consExt}		
 		'''
 
 #rule copyCons:
@@ -155,7 +155,7 @@ rule mon2bed:
 		stringDec=rules.stringDec.output.rawF,
 		wind_bed=rules.selectWind.output.selWind
 	output:
-		decBed="results/decomposition/{PREFIX}/{CHR}/final_decomposition.bed"
+		decBed="decomposition/{PREFIX}/{CHR}/final_decomposition.bed"
 	shell:
 		'''
 		Rscript scripts/dec2bed_fin.R {input.stringDec} {input.wind_bed} {output.decBed}

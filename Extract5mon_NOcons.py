@@ -10,13 +10,13 @@ from Bio.Seq import Seq
 parser = argparse.ArgumentParser()
 parser.add_argument("--fasta",type=str, help="centromere sequence fasta file",required=True)
 parser.add_argument("--bed",type=str, help="bed file with the absolute coordinates of the windows to analize",required=True)
-parser.add_argument("--cons-file",type=str, help="full path of the directory where the output will be saved",required=True)
+parser.add_argument("--out-cons-file",type=str, help="full path of the directory where the output will be saved",required=True)
 
 args = parser.parse_args()
 
 file=args.fasta
 wind_file=args.bed
-cons=args.cons_file
+cons=args.out_cons_file
 
 def mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons):
     s2c_list=[]
@@ -84,6 +84,8 @@ for n,s in enumerate(seqs):
         seq=Seq(full_seq[rel_start:rel_end])
         ran_mon=mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons)
         mon2w.append(ran_mon)
+    else:
+        continue
 
 with open(cons, "w") as o:
     mon2w=[x for y in mon2w for x in y if len(y)>0]
