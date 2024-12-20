@@ -46,7 +46,7 @@ All parameters are described above and you can modify any of them by directly ed
 snakemake --cores 24 --config fasta=/some/fasta/path/
 ```
 
-## Running by to submitting jobs to a HTCondor cluster. 
+### Running by submitting jobs to a HTCondor cluster. 
 
 The pipeline has been developed and tested by submitting jobs to a HTCondor cluster, by using [HTCondor Snakemake profile](https://github.com/Snakemake-Profiles/htcondor). 
 The required libraries are already present in the `requirements.txt`, but you will need to deploy the profile as specified in the [repo](https://github.com/Snakemake-Profiles/htcondor). 
