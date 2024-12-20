@@ -1,8 +1,0 @@
-universe = vanilla
-executable = Test.sh
-log = Test.log
-output = Test.out
-error = Test.err
-request_cpus = 1
-request_memory = 64000
-queue
