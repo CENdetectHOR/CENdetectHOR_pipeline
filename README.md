@@ -7,7 +7,7 @@ Without needin any other information, CENdetectHOR is able to:
 - extract all the monomeric sequences of the higly repetitive region;
 - cluster monomers to phylogenetically identify Higher-Order Repeats (HORs) and monomer faimies.
 
-![Workflow](img/Workflow.pdf)
+![Workflow](/img/Workflow.pdf)
 
 CENdetectHOR has been implemented with [cen_detect_hor library](https://github.com/CENdetectHOR/CENdetectHOR_lib) for the HOR identification andd with the [PhyloTreeGUI](https://github.com/CENdetectHOR/PhyloTreeGUI) to visualize the detected HOR, select the most informative ones, and export output files 
 
