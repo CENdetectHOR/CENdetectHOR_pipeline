@@ -1,4 +1,4 @@
-#config options for CENdetectHOR pipeline
+# config options for CENdetectHOR pipeline
 
 All the values used here are the default ones.
 
