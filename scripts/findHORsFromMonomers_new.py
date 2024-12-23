@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import pathlib
 import sys
 import argparse
 import numpy as np
@@ -42,6 +43,8 @@ maxHOR=args.max_HOR
 minL=args.mon_loops
 lev=args.dis_lev
 
+pathlib.Path(out_distMatr).mkdir(parents=True, exist_ok=True)
+
 old_stdout = sys.stdout
 log_file = open(log,"w")
 sys.stdout = log_file
@@ -58,7 +61,7 @@ monomers_as_features = remove_overlapping_features(
 
 monomers_as_seqs = [feature_to_seq(feature, references) for feature in monomers_as_features]
 
-monomer_dists = build_seqs_distance_matrix_by_chunks(monomers_as_seqs, num_chunks=threads, chunk_store=FileSystemChunkStore(out_distMatr+"_{row}_{col}"))
+monomer_dists = build_seqs_distance_matrix_by_chunks(monomers_as_seqs, num_chunks=threads, chunk_store=FileSystemChunkStore(out_distMatr+"chunk_{row}_{col}"))
 
 with open(out_distMatr+'dist_matrix.npy', 'wb') as f:
     np.save(f, monomer_dists)

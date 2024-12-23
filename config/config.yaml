@@ -1,1 +1,14 @@
-##Config file in progress
+#Please, check the config/README.md for params explaination.
+workdir: /lustrehome/alessiadaponte/cenvolution/
+#outFol: results/
+consFile: human_cons_alphasat.txt
+windowSize: 1000
+kmerSize: 8
+maxHORgap: 10
+maxHORlength: 50
+minHORrep: 3
+discreteTree: True
+HORdet_threads: 16
+
+
+

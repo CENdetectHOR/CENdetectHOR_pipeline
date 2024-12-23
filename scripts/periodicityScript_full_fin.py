@@ -8,6 +8,7 @@ import numpy as np
 from collections import Counter
 import re
 import argparse
+import pathlib
 
 def make_mers(seq,mer_len):
     d={}
@@ -33,7 +34,7 @@ def dist_calc(d, seq):
             ilist=[]
             len_site = len(mer)
             if mer in string:
-                for i in range (0, len(string)):
+                for i in range (0, len(string),10):
                     if mer == string[i:i+len_site]:
                         ilist.append(i)
                     elif mer not in string:
@@ -49,8 +50,8 @@ def dist_calc(d, seq):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--fasta",type=str, help="centromere sequence fasta file",required=True)
-parser.add_argument("--window-size", type=int, help="splitting window size",required=False, default=1000)
-parser.add_argument("--kmer-size", type=int, help="size of the kmer to search for periodicity",required=False, default=8)
+parser.add_argument("--window-size", type=int, help="splitting window size",required=True)
+parser.add_argument("--kmer-size", type=int, help="size of the kmer to search for periodicity",required=True)
 parser.add_argument("--plot-fold",type=str, help="full path of the folder in which the output plots will be saved",required=True)
 parser.add_argument("--wind-summ",type=str, help="output windows summary file",required=True)
 parser.add_argument("--wind-bed",type=str, help="bed file with the windows absolute coordinates",required=True)
@@ -63,6 +64,13 @@ kmer=args.kmer_size
 outfold=args.plot_fold
 windSumm=args.wind_summ
 bed=args.wind_bed
+
+pathlib.Path(outfold).mkdir(parents=True, exist_ok=True)
+
+print(kmer)
+print(windSize)
+#file="/Users/alessiadaponte/Desktop/HSA_test_chr11_5mer/HSA15/HSA_chr15cen.fasta"
+#outfold="/Users/alessiadaponte/Desktop/HSA_test_chr11_5mer/HSA15/CENdetectHOR_test1/"
 
 seq=[]
 with open(file, "r") as f:
@@ -83,7 +91,7 @@ with open(file, "r") as f:
 
 d=make_mers(seq, kmer)
 
-ind4merge=[1 if windSize-len(d[k])>100 else 0 for k in d]
+ind4merge=[1 if windSize-len(d[k])>1000 else 0 for k in d]
 
 seq=[''.join(x) for x in seq]
 
@@ -121,7 +129,7 @@ with open(windSumm, "w") as o:
 
 #ind_list=[lenlist.index(x) for x in lenlist if x>5000]
 ind_list=[]
-thres=5*windSize
+thres=2*windSize
 for v,val in enumerate(lenlist):
     if val>thres and v not in ind_list:
         ind_list.append(v)
@@ -133,13 +141,16 @@ for x in ind_list:
     mer_dict=make_mers(new_seq, kmer)
     d2plot=dist_calc(mer_dict, new_seq)
     count_dist=Counter(d2plot)
-    monlen=int(list(count_dist.most_common(1)[0])[0])
-    plt.figure(figsize=(20,15))
-    plt.hist(d2plot, bins = 963)
-    plt.xticks(np.arange(0, 1000, 100))
-    plt.savefig(outfold+"/"+chrom+"_"+str(out2w[x][0])+"-"+str(out2w[x][1])+".pdf")
-    l2bed=[chrom, str(out2w[x][0]), str(out2w[x][1]), str(monlen)]
-    l2bed_list.append(l2bed)
+    if len(count_dist)>1:
+        monlen=int(list(count_dist.most_common(1)[0])[0])
+        plt.figure(figsize=(20,15))
+        plt.hist(d2plot, bins = windSize)
+        plt.xticks(np.arange(0, 10001, 300))
+        plt.savefig(outfold+"/"+chrom+"_"+str(out2w[x][0])+"-"+str(out2w[x][1])+".pdf")
+        l2bed=[chrom, str(out2w[x][0]), str(out2w[x][1]), str(monlen)]
+        l2bed_list.append(l2bed)
+    else:
+        continue
 with open(bed, "w") as outbed:
     [outbed.write('\t'.join(x)+'\n') for x in l2bed_list]
 
