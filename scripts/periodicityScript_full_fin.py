@@ -90,8 +90,8 @@ with open(file, "r") as f:
     seq=[seq[i:i + windSize] for i in range(0, len(seq), windSize)]
 
 d=make_mers(seq, kmer)
-
-ind4merge=[1 if windSize-len(d[k])>1000 else 0 for k in d]
+val=int(windSize*10/100)
+ind4merge=[1 if windSize-len(d[k])>val else 0 for k in d]
 
 seq=[''.join(x) for x in seq]
 

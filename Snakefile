@@ -28,7 +28,7 @@ rule periodicity:
 		windSumm="results/wind_summary/{PREFIX}.chr{CHR}.txt",
 		bed="results/wind2analize/{PREFIX}.chr{CHR}.windows.bed"
 	params:
-		plotFold="results/plots/chr{CHR}/",
+		plotFold="results/plots/{PREFIX}_chr{CHR}/",
 		script=os.path.join(workflow.basedir, "scripts/periodicityScript_full_fin.py"),
 		W=Wind,
 		K=Kmer
