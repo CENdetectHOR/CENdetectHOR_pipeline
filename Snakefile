@@ -5,6 +5,7 @@ workdir: config["workdir"]
 
 
 CONS= config["consFile"]
+c4cons=str(config["CHRcons"])
 Wind=int(config["windowSize"])
 Kmer=int(config["kmerSize"])
 maxGap=int(config["maxHORgap"])
@@ -53,17 +54,18 @@ rule selectWind:
 	output:
 		selWind="results/wind2analize/{PREFIX}.FULLchr.windows.filtered.bed"
 	params:
-		outfold="results/wind2analize/filtering/",
+		cons=CONS,
+		outfold="results/wind2analize/filtering/{PREFIX}/",
 		script=os.path.join(workflow.basedir, "scripts/windowsFiltering.py")
 	shell:
 		'''
-		python {params.script} --bed {input.windF} --out {params.outfold}
+		python {params.script} --bed {input.windF} --out {params.outfold} --cons {params.cons}
 		cp {params.outfold}*_main.bed {output.selWind}
 		'''
 
 rule extractCons:
 	input:
-		seq="fasta/{PREFIX}.chr{CHR}.fasta",
+		seq=os.path.join("fasta/", c4cons),
 		wind=rules.selectWind.output.selWind
 	output:
 		consExt="monomers/{PREFIX}_chr0cons.fasta"
@@ -98,11 +100,19 @@ rule concatenateMons:
 		'''
 		cat {input.mon} {input.cons} > {output.fullMons}
 		'''
-
+rule uniqueMons:
+	input:
+		fullM=rules.concatenateMons.output.fullMons
+	output:
+		uniqM="results/monomers/{PREFIX}.FULLchr_mons_unique.fasta"
+	shell:
+		'''
+		seqkit rmdup -s < {input.fullM} > {output.uniqM}
+		'''
 rule stringDec:
 	input:
 		seq="fasta/{PREFIX}.chr{CHR}.fasta",
-		fullMons=rules.concatenateMons.output.fullMons
+		fullMons=rules.uniqueMons.output.uniqM
 	params:
 		outdir="results/decomposition/{PREFIX}/{CHR}"
 	output:
@@ -131,7 +141,7 @@ rule HORdet:
 		seq="fasta/{PREFIX}.chr{CHR}.fasta",
 		fullStringDec=rules.mon2bed.output.decBed
 	params:
-		matr="results/HOR/distMatr/chr{CHR}/",
+		matr="results/HOR/distMatr/{PREFIX}/chr{CHR}/",
 		script=os.path.join(workflow.basedir, "scripts/findHORsFromMonomers_new.py"),
 		MG=maxGap,
 		MH=maxHOR,

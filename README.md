@@ -7,7 +7,7 @@ Without needing any other information, CENdetectHOR is able to:
 - extract all the monomeric sequences of the higly repetitive region;
 - cluster monomers to phylogenetically identify Higher-Order Repeats (HORs) and monomer families.
 
-![Workflow](img/Workflow.png)
+![Workflow](./img/Workflow.pdf)
 
 CENdetectHOR has been implemented with [cen_detect_hor library](https://github.com/CENdetectHOR/CENdetectHOR_lib) for the HOR identification and with the [PhyloTreeGUI](https://github.com/CENdetectHOR/PhyloTreeGUI) to visualize the detected HOR, select the most informative ones, and export output files 
 
@@ -41,9 +41,9 @@ Or do a dry run of the pipeline:
 ```
 snakemake --cores 24 -n
 ```
-All parameters are described [here](config/README.md) and you can modify any of them by directly editing the [config.yaml](config/config.yaml) file or via the command line. For example, to change the working directory do:
+All parameters are described [here](config/README.md) and you can modify any of them by directly editing the [config.yaml](config/config.yaml) file or via the command line. For example, to change the fasta location do:
 ```
-snakemake --cores 24 --config workdir=/some/fasta/path/
+snakemake --cores 24 --config fastaFol=/some/fasta/path/
 ```
 
 ### Running by submitting jobs to a HTCondor cluster. 

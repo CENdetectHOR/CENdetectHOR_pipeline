@@ -1,4 +1,4 @@
-# config options for CENdetectHOR pipeline
+#config options for CENdetectHOR pipeline
 
 All the values used here are the default ones.
 
@@ -7,9 +7,14 @@ Path of the folder where the pipeline will be deployed. Here it is expected the 
 workdir: test/
 ```
 
-File with the consensus sequence of the centromeric satellite for the analyzed species. Leave blank if executing without it. 
+File with the consensus sequence of the centromeric satellite for the analyzed species. Type 'no' if executing without it. 
 ```
 consFile: human_cons_alphasat.txt
+```
+
+If exacuting without a consensus, specify the fasta file name you want to start with the monomer extraction phase. You can randomly select one, or specify it based on your preference (e.g., selecting a chromosome of particular interest). Type 'no' if executing with a consesus sequence.
+```
+CHRcons: HSA.chr1.fasta
 ```
 
 Size of the windows for the periodicity step.

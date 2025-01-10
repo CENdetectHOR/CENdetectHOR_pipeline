@@ -1,7 +1,10 @@
-#Please, check the config/README.md for params explaination.
-workdir: /lustrehome/alessiadaponte/cenvolution/
+#Please, check the config/README.md for params explanation.
+workdir: ./CENdetectHOR_pipeline/test/
 #outFol: results/
 consFile: human_cons_alphasat.txt
+#consFile: no 
+#CHRcons: HSA.chr1.fasta
+CHRcons: no
 windowSize: 1000
 kmerSize: 8
 maxHORgap: 10

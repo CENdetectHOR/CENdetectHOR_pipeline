@@ -1,23 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-<<<<<<<< HEAD:scripts/findHORsFromMonomers_new.py
 import pathlib
-========
-import numpy as np
-import matplotlib.pyplot as plt
-from cluster import distance_values
-from Bio import SeqIO
-from Bio import Phylo
-from showHOR import show_hor, show_hors, show_hor_tree
-from featureUtils import BED_file_to_features, feature_to_seq, remove_overlapping_features
-from parallel_distance import build_seqs_distance_matrix_by_chunks, FileSystemChunkStore
-from hor_tree import phylogeny_to_hor_tree
-from Bio.Phylo.PhyloXML import Phyloxml
-from Bio.Phylo import PhyloXMLIO
-from clustering_to_phylogeny import clustering_to_phylogeny
-from mixed_direction_hors import find_inversion_loops
->>>>>>>> 0d75dc00f1af83c7e554bdf9d115ba34cd43b9b7:scripts/.ipynb_checkpoints/findHORsFromMonomers_new-checkpoint.py
 import sys
 import argparse
 import numpy as np
@@ -30,7 +14,7 @@ from cen_detect_hor.showHOR import show_hor, show_hors, show_hor_tree
 from cen_detect_hor.featureUtils import BED_file_to_features, feature_to_seq, remove_overlapping_features
 from cen_detect_hor.parallel_distance import build_seqs_distance_matrix_by_chunks, FileSystemChunkStore
 from cen_detect_hor.hor_tree import phylogeny_to_hor_tree
-from cen_detect_hor.cluster import distance_values
+from cen_detect_hor.distance import distance_values
 from cen_detect_hor.clustering_to_phylogeny import clustering_to_phylogeny
 from cen_detect_hor.mixed_direction_hors import find_inversion_loops
 
@@ -43,7 +27,7 @@ parser.add_argument("--log",type=str, help="name and full path of the log file",
 parser.add_argument("--max-gap",type=int, help="number of threads to use",required=False, default=10)
 parser.add_argument("--max-HOR",type=int, help="maximum HOR length",required=False, default=50)
 parser.add_argument("--min-loops",type=int, help="minimum number of contiguous repetitions to identify a HOR", required=False, default=3)
-parser.add_argument("--dis-lev",type=float, help="True for discrete levels, False for monomer distances", required=False, default=True)
+parser.add_argument("--dis-lev",type=bool, help="True for discrete levels, False for monomer distances", required=False, default=True)
 parser.add_argument("--t",type=int, help="number of threads to use",required=True)
 
 args = parser.parse_args()
@@ -56,7 +40,7 @@ out_tree=args.out_tree
 threads=args.t
 max_gap=args.max_gap
 maxHOR=args.max_HOR
-minL=args.mon_loops
+minL=args.min_loops
 lev=args.dis_lev
 
 pathlib.Path(out_distMatr).mkdir(parents=True, exist_ok=True)
@@ -77,11 +61,7 @@ monomers_as_features = remove_overlapping_features(
 
 monomers_as_seqs = [feature_to_seq(feature, references) for feature in monomers_as_features]
 
-<<<<<<<< HEAD:scripts/findHORsFromMonomers_new.py
 monomer_dists = build_seqs_distance_matrix_by_chunks(monomers_as_seqs, num_chunks=threads, chunk_store=FileSystemChunkStore(out_distMatr+"chunk_{row}_{col}"))
-========
-monomer_dists = build_seqs_distance_matrix_by_chunks(monomers_as_seqs, num_chunks=t, chunk_store=FileSystemChunkStore(out_distMatr+"matr_{row}_{col}"))
->>>>>>>> 0d75dc00f1af83c7e554bdf9d115ba34cd43b9b7:scripts/.ipynb_checkpoints/findHORsFromMonomers_new-checkpoint.py
 
 with open(out_distMatr+'dist_matrix.npy', 'wb') as f:
     np.save(f, monomer_dists)
@@ -100,15 +80,9 @@ clustering_res = clustering_to_phylogeny(
 )
 phylogeny = clustering_res.phylogeny
 
-<<<<<<<< HEAD:scripts/findHORsFromMonomers_new.py
 hor_tree = phylogeny_to_hor_tree(phylogeny, max_allowed_gap=max_gap, max_loop_size=maxHOR, min_loops=minL, allow_hor_overlap=False, discrete_sorted_levels=lev)
 
 inversion_loops = find_inversion_loops(seq_features=monomers_as_features, min_loops=minL)
-========
-hor_tree = phylogeny_to_hor_tree(phylogeny, min_loops=4, allow_hor_overlap=False, discrete_sorted_levels=True)
-
-inversion_loops = find_inversion_loops(seq_features=monomers_as_features, min_loops=4)
->>>>>>>> 0d75dc00f1af83c7e554bdf9d115ba34cd43b9b7:scripts/.ipynb_checkpoints/findHORsFromMonomers_new-checkpoint.py
 [str(loop_inSeq) for loop_inSeq in inversion_loops]
 
 phyloXml = Phyloxml(phylogenies=[phylogeny, hor_tree.as_phyloxml], attributes=None)

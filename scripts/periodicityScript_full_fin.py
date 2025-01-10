@@ -145,7 +145,7 @@ for x in ind_list:
         monlen=int(list(count_dist.most_common(1)[0])[0])
         plt.figure(figsize=(20,15))
         plt.hist(d2plot, bins = windSize)
-        plt.xticks(np.arange(0, 10001, 300))
+        plt.xticks(np.arange(0, 1000, 100))
         plt.savefig(outfold+"/"+chrom+"_"+str(out2w[x][0])+"-"+str(out2w[x][1])+".pdf")
         l2bed=[chrom, str(out2w[x][0]), str(out2w[x][1]), str(monlen)]
         l2bed_list.append(l2bed)
