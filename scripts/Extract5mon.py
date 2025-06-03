@@ -12,6 +12,7 @@ parser.add_argument("--fasta",type=str, help="centromere sequence fasta file",re
 parser.add_argument("--bed",type=str, help="bed file with the absolute coordinates of the windows to analize",required=True)
 parser.add_argument("--cons-file",type=str, help="fasta file with the consensus sequence of the satellite monomer",required=True)
 parser.add_argument("--out-dir",type=str, help="full path of the directory where the output will be saved",required=True)
+parser.add_argument("--n",type=int, help="number of random monomers to extract from the sequence",required=False, default=5)
 
 args = parser.parse_args()
 
@@ -19,6 +20,7 @@ file=args.fasta
 wind_file=args.bed
 consensus=args.cons_file
 out=args.out_dir
+nmon=args.n
 
 def mon_extr(seq, mon_start, rev_mon_start):
     start_list=[]
@@ -50,8 +52,8 @@ def mon_extr(seq, mon_start, rev_mon_start):
     fin_mon_list_r=[x for x in mon_list_r if len(x)==mon]
     if len(fin_mon_list)<len(fin_mon_list_r):
         fin_mon_list=[y.reverse_complement() for y in fin_mon_list_r]
-    if len(fin_mon_list)>5:
-        random_seq=random.sample(fin_mon_list, 5)
+    if len(fin_mon_list)>nmon:
+        random_seq=random.sample(fin_mon_list, nmon)
     else:
         random_seq=[]
     return(random_seq)
@@ -101,7 +103,7 @@ for s in seqs:
 
 with open(out, "w") as o:
     mon2w=[x for y in mon2w for x in y if len(y)>0]
-    fin_ran_ls = random_seq = random.sample(mon2w, 5)
+    fin_ran_ls = random_seq = random.sample(mon2w, nmon)
     for r, ran in enumerate(fin_ran_ls):
         o.write(">" + chrom + "_mon" + str(r + 1) + "\n")
         o.write(str(ran) + "\n")
