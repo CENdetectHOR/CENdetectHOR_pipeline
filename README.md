@@ -25,7 +25,7 @@ conda create -n cendetecthor
 Once created, you can activate the `conda env` env and clone this repository. 
 ```
 conda activate cendetecthor
-git clone https://CENdetectHOR/CENdetectHOR_pipeline.git
+git clone https://github.com/CENdetectHOR/CENdetectHOR_pipeline.git
 conda install --file requirements.txt
 ```
 
