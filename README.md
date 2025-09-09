@@ -17,16 +17,15 @@ CENdetectHOR has been implemented with [cen_detect_hor library](https://github.c
 
 To run CENdetectHOR, we raccomend creating a new `conda env` with a current version of `snakemake` to run this workflow. To get `snakemake` please check the [install instructions on their website](https://snakemake.readthedocs.io/en/stable/getting_started/installation.html). 
 
-Alternatively, you can create a new env with:
+Alternatively, you can clone the repo with:
 ```
-conda create -n cendetecthor
+git clone https://github.com/CENdetectHOR/CENdetectHOR_pipeline.git
 ```
 
-Once created, you can activate the `conda env` env and clone this repository. 
+Then, you can create the `conda env` env and activate it with: 
 ```
+conda env create -f CENdetectHOR.yml
 conda activate cendetecthor
-git clone https://github.com/CENdetectHOR/CENdetectHOR_pipeline.git
-conda install --file requirements.txt
 ```
 
 ### Running
