@@ -48,7 +48,7 @@ snakemake --cores 24 --config fastaFol=/some/fasta/path/
 ### Running by submitting jobs to a HTCondor cluster. 
 
 The pipeline has been developed and tested by submitting jobs to a HTCondor cluster using [HTCondor Snakemake profile](https://github.com/Snakemake-Profiles/htcondor). 
-The required libraries are already present in the `requirements.txt`, but you will need to deploy the profile as specified in the [repo](https://github.com/Snakemake-Profiles/htcondor). 
+The required libraries are already present in the `CENdetectHOR.yml`, but you will need to deploy the profile as specified in the [repo](https://github.com/Snakemake-Profiles/htcondor). 
 Then, you can run the pipleine by using:
 ```
 snakemake --profile htcondor
