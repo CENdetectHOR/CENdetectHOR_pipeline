@@ -30,7 +30,7 @@ conda activate cendetecthor
 
 ### Running
 
-To run CENdetectHOR, place all the fasta files in the format `SampleID.chrN.fasta` to be analyzed in a directory and specify the path in the [config.yaml](config/config.yaml) file accordingly.
+To run CENdetectHOR, create a `fasta` directory in your workdir and place all the fasta files in the format `SampleID.chrN.fasta` to be analyzed there. Then, specify the path of the workdir in the [config.yaml](config/config.yaml) file accordingly.
 
 Once this is done and you have activated your `conda env` you can run the pipeline like so:
 ```
