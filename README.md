@@ -42,7 +42,7 @@ snakemake --cores 24 -n
 ```
 All parameters are described [here](config/README.md) and you can modify any of them by directly editing the [config.yaml](config/config.yaml) file or via the command line. For example, to change the fasta location do:
 ```
-snakemake --cores 24 --config fastaFol=/some/fasta/path/
+snakemake --cores 24 --config workdir=/some/workdir/path/
 ```
 
 ### Running by submitting jobs to a HTCondor cluster. 
