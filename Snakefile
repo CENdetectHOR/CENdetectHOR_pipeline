@@ -13,6 +13,8 @@ maxHOR=int(config["maxHORlength"])
 minrep=int(config["minHORrep"])
 discTree=config["discreteTree"]
 HOR_t=int(config["HORdet_threads"])
+nMon=int(config["mon_number"])
+
 
 prefix, chrom= glob_wildcards("fasta/{PREFIX}.chr{CHR}.fasta")
 
@@ -84,10 +86,11 @@ rule extractMon:
 	output:
 		mon="results/monomers/{PREFIX}.chr{CHR}_mons.fasta"	
 	params:
-		script=os.path.join(workflow.basedir, "scripts/Extract5mon.py")
+		script=os.path.join(workflow.basedir, "scripts/Extract5mon.py"),
+		n=nMon
 	shell:
 		'''
-		python {params.script} --fasta {input.seq} --bed {input.wind} --cons-file {input.cons} --out {output.mon}
+		python {params.script} --fasta {input.seq} --bed {input.wind} --cons-file {input.cons} --out {output.mon} --n {params.n}
 		'''
 
 rule concatenateMons:
@@ -154,5 +157,5 @@ rule HORdet:
 	threads: HOR_t
 	shell:
 		'''
-		python {params.script} --fasta {input.seq} --bed {input.fullStringDec} --out-tree {output.tree} --out-distMatr {params.matr} --log {log} --t {threads} --max-gap {params.MG} --max-HOR {params.MH} --min-loops {params.mL} --dis-lev {params.DL}
+		python {params.script} --fasta {input.seq} --bed {input.fullStringDec} --out-tree {output.tree} --out-distMatr {params.matr} --mon-len 171 --log {log} --t {threads} --max-gap {params.MG} --max-HOR {params.MH} --min-loops {params.mL} --dis-lev {params.DL}
 		'''

@@ -1,17 +1,17 @@
 #Please, check the config/README.md for params explanation.
-workdir: ./CENdetectHOR_pipeline/test/
-#outFol: results/
+workdir: /lustrehome/alessiadaponte/cenvolution/
+#outFol: /lustrehome/alessiadaponte/cenvolution/results/
 consFile: human_cons_alphasat.txt
 #consFile: no 
-#CHRcons: HSA.chr1.fasta
+#CHRcons: Cjaponica.chr1.fasta
 CHRcons: no
 windowSize: 1000
-kmerSize: 8
+kmerSize: 10
 maxHORgap: 10
 maxHORlength: 50
 minHORrep: 3
 discreteTree: True
 HORdet_threads: 16
-
+mon_number: 5
 
 
