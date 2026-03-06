@@ -5,7 +5,7 @@ import numpy as np
 import re
 import random
 import argparse
-from Bio.Seq import Seq
+from collections import defaultdict
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--fasta",type=str, help="centromere sequence fasta file",required=True)
@@ -18,45 +18,36 @@ file=args.fasta
 wind_file=args.bed
 cons=args.out_cons_file
 
-def mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons):
-    s2c_list=[]
-    for p,pos in enumerate(seq):
-        endpos=int(p)+6
-        s2c_2app=seq[p:endpos]
-        s2c_list.append("".join(s2c_2app))
-    for index in s2c_list:
-        start_list=[]
-        mon_list=[]
-        for b,base in enumerate(seq):
-            checkend=int(b)+6
-            start2check=seq[int(b):int(checkend)]
-            s2c="".join(start2check)
-            if s2c==index:
-                start_list.append(b)
-        for t,temp in enumerate(start_list):
-            if t==0:
-                prev=int(temp)
-            else:
-                mon2app=seq[int(prev):int(temp)]
-                mon_list.append(mon2app)
-                prev=temp
-        fin_mon_list=[x for x in mon_list if len(x)>min_mon and len(x)<max_mon]
-        if len(fin_mon_list)> Nmin_mons:
-            break
-        else:
+def mon_extr_nocons(seq, min_mon, max_mon, Nmin_mons, mon):
+    seq = str(seq)
+    k = 6
+    kmer_pos = defaultdict(list)
+    for i in range(len(seq) - k + 1):
+        kmer = seq[i:i+k]
+        kmer_pos[kmer].append(i)
+    for kmer, positions in kmer_pos.items():
+        if len(positions) < 2:
             continue
-    fin_mon_list=[x for x in fin_mon_list if len(x)==mon]
-    fin_mon_list=["".join(m) for m in fin_mon_list]
-    random_seq=random.sample(fin_mon_list, 1)
-    return(random_seq)
+        mon_list = []
+        prev = positions[0]
+        for pos in positions[1:]:
+            mon_len = pos - prev
+            if min_mon < mon_len < max_mon:
+                mon_list.append(seq[prev:pos])
+            prev = pos
+        if len(mon_list) > Nmin_mons:
+            fin_mon_list = [m for m in mon_list if len(m) == mon]
+            return fin_mon_list
 
 seqs=[]
+mon=[]
 with open(wind_file, "r") as wind:
     for w in wind:
         w=w.strip().split("\t")
         seq2check=[w[1],w[2]]
         seqs.append(seq2check)
-        mon=int(w[3])
+        mon.append(w[3])
+mon=int(max(set(mon), key=mon.count))
 
 mon2w=[]
 full_seq=[]
@@ -73,19 +64,20 @@ with open(file, "r") as f:
 full_seq="".join(full_seq)
 
 for n,s in enumerate(seqs):
-    if n==0:
-        len_seq=int(s[1])-int(s[0])
-        Nmax_mons=len_seq/mon
-        Nmin_mons=Nmax_mons-(Nmax_mons/100*30)
-        min_mon=mon-5
-        max_mon=mon+5
-        rel_start=int(s[0])-int(start)
-        rel_end=int(s[1])-int(start)
-        seq=Seq(full_seq[rel_start:rel_end])
-        ran_mon=mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons)
-        mon2w.append(ran_mon)
-    else:
-        continue
+    len_seq=int(s[1])-int(s[0])
+    Nmax_mons=len_seq/mon
+    Nmin_mons=Nmax_mons-(Nmax_mons/100*30)
+    min_mon=mon-5
+    max_mon=mon+5
+    rel_start=int(s[0])-int(start)
+    rel_end=int(s[1])-int(start)
+    seq = full_seq[rel_start:rel_end]
+    ran_mon=mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons,mon)
+    #mon2w.append(ran_mon)
+    if ran_mon:
+        random_seq=random.sample(ran_mon, 1)
+        mon2w.append(random_seq)
+        break
 
 with open(cons, "w") as o:
     mon2w=[x for y in mon2w for x in y if len(y)>0]
