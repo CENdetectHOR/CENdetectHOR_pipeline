@@ -28,9 +28,11 @@ if __name__ == '__main__':
     parser.add_argument("--log",type=str, help="name and full path of the log file",required=True)
     parser.add_argument("--max-gap",type=int, help="number of threads to use",required=False, default=10)
     parser.add_argument("--max-HOR",type=int, help="maximum HOR length",required=False, default=50)
+    parser.add_argument("--mon-len",type=int, help="expected monomer length",required=True)
     parser.add_argument("--min-loops",type=int, help="minimum number of contiguous repetitions to identify a HOR", required=False, default=3)
     parser.add_argument("--dis-lev",type=bool, help="True for discrete levels, False for monomer distances", required=False, default=True)
     parser.add_argument("--t",type=int, help="number of threads to use",required=True)
+    
 
     args = parser.parse_args()
 
@@ -44,6 +46,7 @@ if __name__ == '__main__':
     maxHOR=args.max_HOR
     minL=args.min_loops
     lev=args.dis_lev
+    mon_len=args.mon_len
 
     pathlib.Path(out_distMatr).mkdir(parents=True, exist_ok=True)
 
@@ -57,7 +60,7 @@ if __name__ == '__main__':
 
     monomers_as_features = remove_overlapping_features(
         features=monomers_as_features,
-        expected_feature_size=171,
+        expected_feature_size=mon_len,
         max_allowed_overlap_fraction=0.25
     )
 
