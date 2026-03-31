@@ -22,13 +22,13 @@ consensus=args.cons_file
 out=args.out_dir
 nmon=args.n
 
-def mon_extr(seq, mon_start, rev_mon_start):
+def mon_extr(seq, mon_start, rev_mon_start, kmer):
     start_list=[]
     start_list_rev=[]
     mon_list=[]
     mon_list_r=[]
-    for b,base in enumerate(seq):
-        checkend=int(b)+6
+    for b in range(len(seq)):
+        checkend=b+kmer
         start2check=seq[int(b):int(checkend)]
         if start2check==mon_start:
             start_list.append(b)
@@ -52,18 +52,14 @@ def mon_extr(seq, mon_start, rev_mon_start):
     fin_mon_list_r=[x for x in mon_list_r if len(x)==mon]
     if len(fin_mon_list)<len(fin_mon_list_r):
         fin_mon_list=[y.reverse_complement() for y in fin_mon_list_r]
-    if len(fin_mon_list)>nmon:
-        random_seq=random.sample(fin_mon_list, nmon)
-    else:
-        random_seq=[]
-    return(random_seq)
+    return(fin_mon_list)
 
 with open(consensus, "r") as c:
     for b,line in enumerate(c):
         if b==0:
             continue
         elif b==1:
-            cons=Seq(line)
+            cons = Seq(line.strip())
 print(cons)
 mon=len(cons)
 mon_start=cons[0:6]
@@ -93,17 +89,24 @@ with open(file, "r") as f:
             full_seq.append(line.strip())
 full_seq="".join(full_seq)
 #print(full_seq)
-for s in seqs:
-    rel_start=int(s[0])-int(start)
-    rel_end=int(s[1])-int(start)
-    seq=Seq(full_seq[rel_start:rel_end])
-    ran_mon=mon_extr(seq, mon_start, rev_mon_start)
-    print(ran_mon)
-    mon2w.append(ran_mon)
+for kmer in range(6,3,-1):
+    mon2w = []
+    for s in seqs:
+        rel_start=int(s[0])-int(start)
+        rel_end=int(s[1])-int(start)
+        seq=Seq(full_seq[rel_start:rel_end])
+        ran_mon=mon_extr(seq, mon_start, rev_mon_start, kmer)
+        print(ran_mon)
+        mon2w.append(ran_mon)
+    mon2w = [x for y in mon2w if y for x in y]
+    if len(mon2w) >= 2:
+        break
 
 with open(out, "w") as o:
-    mon2w=[x for y in mon2w for x in y if len(y)>0]
-    fin_ran_ls = random_seq = random.sample(mon2w, nmon)
+    if len(mon2w) >= nmon:
+        fin_ran_ls = random.sample(mon2w, nmon)
+    else:
+        fin_ran_ls = mon2w
     for r, ran in enumerate(fin_ran_ls):
         o.write(">" + chrom + "_mon" + str(r + 1) + "\n")
         o.write(str(ran) + "\n")

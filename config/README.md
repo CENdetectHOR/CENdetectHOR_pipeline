@@ -27,6 +27,11 @@ Size of the kmer for the periodicity step.
 kmerSize: 8
 ```
 
+Satellite monomer length, if known, can optionally be provided here, otherwise type 'no'.
+```
+expMonSize: no
+```
+
 Maximum allowed gap (bp) between monomers in HORs.
 ```
 maxHORgap: 10
@@ -42,7 +47,7 @@ Minumum number of contiguous repetitions to detect a HOR
 minHORrep: 3
 ```
 
-Method to construct the HOR tree, if discrete levels are defined by height from leaves. 
+Method to construct the HOR tree, True it will define levels of the HOR tree as exact distancesc between families, otherwise will use discrete levels to cut the monomer tree. 
 ```
 discreteTree: True
 ```

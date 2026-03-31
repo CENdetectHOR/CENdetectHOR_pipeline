@@ -8,6 +8,7 @@ CONS= config["consFile"]
 c4cons=str(config["CHRcons"])
 Wind=int(config["windowSize"])
 Kmer=int(config["kmerSize"])
+mon_len = int(config["expMonSize"]) if config["expMonSize"] else None
 maxGap=int(config["maxHORgap"])
 maxHOR=int(config["maxHORlength"])
 minrep=int(config["minHORrep"])
@@ -57,11 +58,12 @@ rule selectWind:
 		selWind="results/wind2analize/{PREFIX}.FULLchr.windows.filtered.bed"
 	params:
 		cons=CONS,
+		mlen=mon_len,
 		outfold="results/wind2analize/filtering/{PREFIX}/",
 		script=os.path.join(workflow.basedir, "scripts/windowsFiltering.py")
 	shell:
 		'''
-		python {params.script} --bed {input.windF} --out {params.outfold} --cons {params.cons}
+		python {params.script} --bed {input.windF} --out {params.outfold} --cons {params.cons} --mon-len {mlen}
 		cp {params.outfold}*_main.bed {output.selWind}
 		'''
 
@@ -157,5 +159,5 @@ rule HORdet:
 	threads: HOR_t
 	shell:
 		'''
-		python {params.script} --fasta {input.seq} --bed {input.fullStringDec} --out-tree {output.tree} --out-distMatr {params.matr} --mon-len 171 --log {log} --t {threads} --max-gap {params.MG} --max-HOR {params.MH} --min-loops {params.mL} --dis-lev {params.DL}
+		python {params.script} --fasta {input.seq} --bed {input.fullStringDec} --out-tree {output.tree} --out-distMatr {params.matr} --log {log} --t {threads} --max-gap {params.MG} --max-HOR {params.MH} --min-loops {params.mL} --dis-lev {params.DL}
 		'''
