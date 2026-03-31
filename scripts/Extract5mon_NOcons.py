@@ -83,4 +83,4 @@ with open(cons, "w") as o:
     mon2w=[x for y in mon2w for x in y if len(y)>0]
     for r,ran in enumerate(mon2w):
         o.write(">cons_"+str(r+1)+"\n")
-        o.write(str(ran)+"\n")
+        o.write(str(ran))

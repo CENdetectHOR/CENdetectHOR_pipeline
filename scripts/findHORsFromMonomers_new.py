@@ -45,7 +45,6 @@ if __name__ == '__main__':
     maxHOR=args.max_HOR
     minL=args.min_loops
     lev=args.dis_lev
-    #mon_len=args.mon_len
 
     pathlib.Path(out_distMatr).mkdir(parents=True, exist_ok=True)
 
