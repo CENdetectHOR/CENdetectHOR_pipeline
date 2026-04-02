@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--fasta",type=str, help="centromere sequence fasta file",required=True)
 parser.add_argument("--bed",type=str, help="bed file with the absolute coordinates of the windows to analize",required=True)
 parser.add_argument("--out-cons-file",type=str, help="full path of the directory where the output will be saved",required=True)
+parser.add_argument("--mon-len",type=int, help="satellite monomer size, if known",required=False)
 
 args = parser.parse_args()
 
@@ -47,7 +48,11 @@ with open(wind_file, "r") as wind:
         seq2check=[w[1],w[2]]
         seqs.append(seq2check)
         mon.append(w[3])
-mon=int(max(set(mon), key=mon.count))
+
+if args.mon_len:
+    mon = args.mon_len
+else:
+    mon=int(max(set(mon), key=mon.count))
 
 mon2w=[]
 full_seq=[]

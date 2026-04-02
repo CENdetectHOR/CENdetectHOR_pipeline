@@ -14,9 +14,9 @@ args = parser.parse_args()
 input_file=args.bed
 outdir=args.out
 mon_len=args.mon_len
-cons=Path(args.cons)
+cons=Path(args.cons) if args.cons else None
 
-Path(args.out).mkdir(parents=True, exist_ok=True)
+Path(outdir).mkdir(parents=True, exist_ok=True)
 
 def comp_mon(unik_val, mon_ls):
     gr_multi = {}
@@ -88,7 +88,7 @@ else:
 print("Main monomer:", maxK)
 
 for key, rows in gr_data.items():
-    if key in range(maxK - 4, maxK + 5):
+    if key % maxK <= 4 or key % maxK >= maxK - 4:
         outfile = f"{outdir}/mon_{key}bps_main.bed"
     else:
         outfile = f"{outdir}/mon_{key}bps.bed"
