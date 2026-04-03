@@ -60,10 +60,11 @@ rule selectWind:
 		cons=CONS,
 		mlen=mon_len,
 		outfold="results/wind2analize/filtering/{PREFIX}/",
-		script=os.path.join(workflow.basedir, "scripts/windowsFiltering.py")
+		script=os.path.join(workflow.basedir, "scripts/windowsFiltering.py"),
+		script_opt_params=f" {f"--cons {CONS}" if CONS and CONS != "no" else ""} {f"--mon-len {mon_len}" if mon_len else ""}"
 	shell:
 		'''
-		python {params.script} --bed {input.windF} --out {params.outfold} --cons {params.cons} --mon-len {mlen}
+		python {params.script} --bed {input.windF} --out {params.outfold} {params.script_opt_params}
 		cp {params.outfold}*_main.bed {output.selWind}
 		'''
 
@@ -74,10 +75,11 @@ rule extractCons:
 	output:
 		consExt="monomers/{PREFIX}_chr0cons.fasta"
 	params:
-		script=os.path.join(workflow.basedir, "scripts/Extract5mon_NOcons.py")
+		script=os.path.join(workflow.basedir, "scripts/Extract5mon_NOcons.py"),
+		script_opt_params=f"--mon-len {mon_len}" if mon_len else ""
 	shell:
 		'''
-		python {params.script} --fasta {input.seq} --bed {input.wind} --out-cons-file {output.consExt}		
+		python {params.script} --fasta {input.seq} --bed {input.wind} --out-cons-file {output.consExt} {params.script_opt_params}	
 		'''
 
 rule extractMon:
