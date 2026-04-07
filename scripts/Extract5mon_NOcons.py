@@ -19,9 +19,8 @@ file=args.fasta
 wind_file=args.bed
 cons=args.out_cons_file
 
-def mon_extr_nocons(seq, min_mon, max_mon, Nmin_mons, mon):
+def mon_extr_nocons(seq, min_mon, max_mon, Nmin_mons, monLen,k):
     seq = str(seq)
-    k = 6
     kmer_pos = defaultdict(list)
     for i in range(len(seq) - k + 1):
         kmer = seq[i:i+k]
@@ -36,8 +35,8 @@ def mon_extr_nocons(seq, min_mon, max_mon, Nmin_mons, mon):
             if min_mon < mon_len < max_mon:
                 mon_list.append(seq[prev:pos])
             prev = pos
-        if len(mon_list) > Nmin_mons:
-            fin_mon_list = [m for m in mon_list if len(m) == mon]
+        if len(mon_list) > int(Nmin_mons):
+            fin_mon_list = [m for m in mon_list if len(m) == monLen]
             return fin_mon_list
 
 seqs=[]
@@ -50,11 +49,10 @@ with open(wind_file, "r") as wind:
         mon.append(w[3])
 
 if args.mon_len:
-    mon = args.mon_len
+    monLen = args.mon_len
 else:
-    mon=int(max(set(mon), key=mon.count))
+    monLen=int(max(set(mon), key=mon.count))
 
-mon2w=[]
 full_seq=[]
 with open(file, "r") as f:
     for l,line in enumerate(f):
@@ -68,24 +66,28 @@ with open(file, "r") as f:
             full_seq.append(line.strip())
 full_seq="".join(full_seq)
 
-for n,s in enumerate(seqs):
-    len_seq=int(s[1])-int(s[0])
-    Nmax_mons=len_seq/mon
-    Nmin_mons=Nmax_mons-(Nmax_mons/100*30)
-    min_mon=mon-5
-    max_mon=mon+5
-    rel_start=int(s[0])-int(start)
-    rel_end=int(s[1])-int(start)
-    seq = full_seq[rel_start:rel_end]
-    ran_mon=mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons,mon)
-    #mon2w.append(ran_mon)
-    if ran_mon:
-        random_seq=random.sample(ran_mon, 1)
-        mon2w.append(random_seq)
+for k in range(6,3,-1):
+    mon2w = []
+    for n,s in enumerate(seqs):
+        len_seq=int(s[1])-int(s[0])
+        Nmax_mons=len_seq/monLen
+        Nmin_mons=Nmax_mons-(Nmax_mons/100*30)
+        min_mon=monLen-5
+        max_mon=monLen +5
+        rel_start=int(s[0])-int(start)
+        rel_end=int(s[1])-int(start)
+        seq = full_seq[rel_start:rel_end]
+        ran_mon=mon_extr_nocons(seq,min_mon,max_mon,Nmin_mons,monLen, k)
+        #mon2w.append(ran_mon)
+        if ran_mon:
+            random_seq=random.sample(ran_mon, 1)
+            mon2w.append(random_seq[0])
+            break
+    if len(mon2w) >= 1:
         break
 
 with open(cons, "w") as o:
-    mon2w=[x for y in mon2w for x in y if len(y)>0]
+    #mon2w=[x for y in mon2w for x in y if len(y)>0]
     for r,ran in enumerate(mon2w):
         o.write(">cons_"+str(r+1)+"\n")
         o.write(str(ran))
