@@ -9,7 +9,7 @@ windowSize: 1000
 kmerSize: 10
 expMonSize: no
 maxHORgap: 10
-maxHORlength: 50
+maxHORlength: 100
 minHORrep: 3
 discreteTree: True
 HORdet_threads: 16
