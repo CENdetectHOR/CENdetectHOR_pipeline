@@ -88,7 +88,7 @@ else:
 print("Main monomer:", maxK)
 
 for key, rows in gr_data.items():
-    if key % maxK <= 4 or key % maxK >= maxK - 4:
+    if key == maxK:
         outfile = f"{outdir}/mon_{key}bps_main.bed"
     else:
         outfile = f"{outdir}/mon_{key}bps.bed"
