@@ -1,7 +1,15 @@
 #!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
 
 import argparse
 from pathlib import Path
+
+
+# In[ ]:
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--bed",type=str, help="bed file with the whole genome set of windows to be filtered",required=True)
@@ -18,6 +26,10 @@ cons=Path(args.cons) if args.cons else None
 
 Path(outdir).mkdir(parents=True, exist_ok=True)
 
+
+# In[74]:
+
+
 def comp_mon(unik_val, mon_ls):
     gr_multi = {}
     for base in mon_ls:
@@ -31,12 +43,20 @@ def comp_mon(unik_val, mon_ls):
                     break
     return gr_multi
 
+
+# In[75]:
+
+
 def main_mon(gr_data):
     sums = {}
     for k, rows in gr_data.items():
         total = sum(r[4] for r in rows)
         sums[k] = total
     return sums
+
+
+# In[76]:
+
 
 data = []
 lengths = []
@@ -47,36 +67,49 @@ with open(input_file, "r") as f:
         width = end - start
         row.append(width)
         data.append(row)
-        lengths.append(width)
+        lengths.append(int(row[3]))
 
 unik = sorted(set(lengths))
 
+
+# In[77]:
+
+
 mon_l = []
-for mon in unik:
-    found = False
-    for t in unik:
-        if abs(mon - t) <= 4:
-            min_mon = min(mon, t)
-            if min_mon not in mon_l:
-                mon_l.append(min_mon)
-            found = True
-    if not found:
-        mon_l.append(mon)
-mon_l = sorted(set(mon_l))
+current_cluster = [unik[0]]
+
+for x in unik[1:]:
+    if x - current_cluster[-1] <= 4:
+        current_cluster.append(x)
+    else:
+        mon_l.append(round(sum(current_cluster) / len(current_cluster)))
+        current_cluster = [x]
+
+mon_l.append(round(sum(current_cluster) / len(current_cluster)))
+
+
+# In[78]:
+
 
 combined = comp_mon(unik, mon_l)
 gr_data = {}
 for row in data:
-    length = row[4]
+    length = int(row[3])
     for key, group in combined.items():
-        if length in group:
+        group= [int(x) for x in group]
+        if length ==int(key) or length in group:
             gr_data.setdefault(key, []).append(row)
-            break
+        else:
+            continue
 
 sums_mon = main_mon(gr_data)
 
+
+# In[81]:
+
+
 if cons:
-    with open(args.cons) as f:
+    with open(cons) as f:
         for i, line in enumerate(f):
             if i == 1:
                 maxK = len(line.strip())
@@ -87,8 +120,12 @@ else:
 
 print("Main monomer:", maxK)
 
+
+# In[85]:
+
+
 for key, rows in gr_data.items():
-    if key == maxK:
+    if abs(key-maxK) <= 4 :
         outfile = f"{outdir}/mon_{key}bps_main.bed"
     else:
         outfile = f"{outdir}/mon_{key}bps.bed"
@@ -96,3 +133,4 @@ for key, rows in gr_data.items():
     with open(outfile, "w") as o:
         for r in rows:
             o.write("\t".join(map(str, r[:4])) + "\n")
+
