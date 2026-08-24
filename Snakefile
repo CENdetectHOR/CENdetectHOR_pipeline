@@ -15,6 +15,8 @@ minrep=int(config["minHORrep"])
 discTree=config["discreteTree"]
 HOR_t=int(config["HORdet_threads"])
 nMon=int(config["mon_number"])
+cons_param = f"--cons {CONS}" if CONS and CONS != "no" else ""
+mon_param  = f"--mon-len {mon_len}" if mon_len else ""
 
 
 prefix, chrom= glob_wildcards("fasta/{PREFIX}.chr{CHR}.fasta")
@@ -42,14 +44,14 @@ rule periodicity:
 		'''
 
 rule concatenateWind:
-        input:
-                wind2conc=expand("results/wind2analize/{PREFIX}.chr{CHR}.windows.bed", CHR=chrom, allow_missing=True)
-        output:
-                fullWind="results/wind2analize/{PREFIX}.FULLchr.windows.bed"
-        shell:
-                '''
-                cat {input.wind2conc} > {output.fullWind}
-                '''
+	input:
+		wind2conc=expand("results/wind2analize/{PREFIX}.chr{CHR}.windows.bed", CHR=chrom, allow_missing=True)
+	output:
+		fullWind="results/wind2analize/{PREFIX}.FULLchr.windows.bed"
+	shell:
+		'''
+		cat {input.wind2conc} > {output.fullWind}
+		'''
 
 rule selectWind:
 	input:
@@ -61,7 +63,7 @@ rule selectWind:
 		mlen=mon_len,
 		outfold="results/wind2analize/filtering/{PREFIX}/",
 		script=os.path.join(workflow.basedir, "scripts/windowsFiltering.py"),
-		script_opt_params=f" {f"--cons {CONS}" if CONS and CONS != "no" else ""} {f"--mon-len {mon_len}" if mon_len else ""}"
+		script_opt_params=f"{cons_param} {mon_param}"
 	shell:
 		'''
 		python {params.script} --bed {input.windF} --out {params.outfold} {params.script_opt_params}
